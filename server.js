@@ -1,24 +1,13 @@
-const { loadNuxt, build } = require('nuxt')
+const express = require('express')
+const app = express()
+const port = 3000
 
-const app = require('express')()
-const isDev = process.env.NODE_ENV !== 'production'
-const port = process.env.PORT || 3000
+app.set("view engine", "ejs")
 
-async function start() {
-  // We get Nuxt instance
-  const nuxt = await loadNuxt(isDev ? 'dev' : 'start')
+app.get('/', (req, res) => {
+  res.render("index")
+})
 
-  // Render every route with Nuxt
-  app.use(nuxt.render)
-
-  // Build only in dev mode with hot-reloading
-  if (isDev) {
-    build(nuxt)
-  }
-  // Listen the server
-  app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-  });
-}
-
-start()
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`)
+})

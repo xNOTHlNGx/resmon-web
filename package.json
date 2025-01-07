@@ -1,22 +1,19 @@
 {
   "name": "resmon-web",
   "version": "1.0.0",
-  "private": true,
+  "description": "",
+  "main": "server.js",
   "scripts": {
-    "dev": "node server && nuxt",
-    "build": "nuxt build",
-    "start": "node server && nuxt start",
-    "generate": "nuxt generate"
+    "start": "nodemon server.js"
   },
+  "author": "xNOTHlNGx, linvisn",
+  "license": "MIT",
   "dependencies": {
-    "bootstrap": "^4.6.2",
-    "bootstrap-vue": "^2.22.0",
-    "core-js": "^3.25.3",
+    "ejs": "^3.1.10",
     "express": "^4.21.2",
-    "nuxt": "^2.18.1",
-    "prompt-sync": "^4.2.0",
-    "vue": "^2.7.10",
-    "vue-server-renderer": "^2.7.10",
-    "vue-template-compiler": "^2.7.10"
+    "nodemon": "^3.1.9"
+  },
+  "nodemonConfig": {
+    "ext": "js,json,ejs,html,css"
   }
 }
