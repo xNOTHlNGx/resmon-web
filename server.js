@@ -12,6 +12,10 @@ app.get('/', (req, res) => {
   res.render("index");
 });
 
+app.get('/test', (req, res) => {
+    res.render("test");
+  });
+
 // SSE route to stream memory data
 app.get('/sse/meminfo', (req, res) => {
     // Set the appropriate headers for SSE
