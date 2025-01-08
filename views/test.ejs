@@ -4,6 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .mem-info {
+            margin: 10px 0;
+        }
+        .mem-info strong {
+            display: inline-block;
+            width: 150px;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
     <h1>Memory Info</h1>
@@ -15,14 +32,24 @@
         // Create a new EventSource to listen for updates from the server
         const eventSource = new EventSource('/sse/meminfo');
 
+        // Function to update memory data on the page
+        const updateMemInfo = (data) => {
+            const { memTotal, memFree, memAvailable, memCached, memUsed } = data;
+
+            // Display memory data dynamically
+            document.getElementById('mem-info').innerHTML = `
+                <div class="mem-info"><strong>Total Memory:</strong> ${memTotal.value} ${memTotal.unit}</div>
+                <div class="mem-info"><strong>Free Memory:</strong> ${memFree.value} ${memFree.unit}</div>
+                <div class="mem-info"><strong>Available Memory:</strong> ${memAvailable.value} ${memAvailable.unit}</div>
+                <div class="mem-info"><strong>Cached Memory:</strong> ${memCached.value} ${memCached.unit}</div>
+                <div class="mem-info"><strong>Used Memory:</strong> ${memUsed.value} ${memUsed.unit}</div>
+            `;
+        };
+
         // Event listener for memory updates from the server
         eventSource.onmessage = function(event) {
             const memInfo = JSON.parse(event.data);
-            document.getElementById('mem-info').innerHTML = `
-                <strong>Total Memory:</strong> ${memInfo.memTotal.value} ${memInfo.memTotal.unit} <br>
-                <strong>Free Memory:</strong> ${memInfo.memFree.value} ${memInfo.memFree.unit} <br>
-                <strong>Used Memory:</strong> ${memInfo.memUsed.value} ${memInfo.memUsed.unit}
-            `;
+            updateMemInfo(memInfo);
         };
 
         // Handle any errors
