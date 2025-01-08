@@ -6,6 +6,7 @@ const path = require('path');
 
 app.set("view engine", "ejs");
 app.use(express.static('static'));
+app.use("/bs", express.static("./node_modules/bootstrap/dist/"));
 
 app.get('/', (req, res) => {
     res.render("index");
@@ -95,5 +96,5 @@ app.get('/sse/cpuinfo', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server is running on http://0.0.0.0:${port}`);
+    console.log(`Server is running on http://localhost:${port}`);
 });

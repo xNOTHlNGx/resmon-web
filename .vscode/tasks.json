@@ -1,0 +1,11 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Sass Compile",
+        "type": "shell",
+        "command": "sass --watch --style=compressed ./static/scss/custom.scss ./static/css/custom.css",
+        "group": "build"
+      }
+    ]
+  }

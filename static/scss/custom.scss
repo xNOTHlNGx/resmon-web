@@ -1,0 +1,30 @@
+@import "../../node_modules/bootstrap/scss/bootstrap";
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
+@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap');
+
+* {
+    color: var(--bs-body-color);
+    font-family: "Funnel Display";
+}
+
+.panel {
+    @extend .d-flex;
+    @extend .flex-column;
+    @extend .w-25;
+    @extend .h-100;
+    @extend .p-3;
+    
+    background-color: var(--bs-tertiary-bg);
+}
+
+.panel-button {
+    @extend .w-100;
+    @extend .px-3;
+    @extend .py-2;
+    @extend .py-2;
+    @extend .fs-4;
+    @extend .fw-semibold;
+    @extend .rounded-1;
+
+    background-color: var(--bs-secondary-bg);
+}
