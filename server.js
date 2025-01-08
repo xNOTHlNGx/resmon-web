@@ -12,20 +12,9 @@ app.get('/', (req, res) => {
   res.render("index");
 });
 
-//info page (will be removed, created for demonstration for frontend)
-app.get('/test', (req, res) => {
-  res.render("test");
-});
-
 // SSE route to stream memory data
 app.get('/sse/meminfo', (req, res) => {
     // Set the appropriate headers for SSE
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    
-    // SSE route to stream memory data
-app.get('/sse/meminfo', (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -63,14 +52,6 @@ app.get('/sse/meminfo', (req, res) => {
             }
         });
     };
-
-    const interval = setInterval(sendMemInfo, 1000);
-
-    req.on('close', () => {
-        clearInterval(interval);
-    });
-});
-
 
     // Send memory info every 1 second
     const interval = setInterval(sendMemInfo, 1000);
