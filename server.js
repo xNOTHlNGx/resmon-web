@@ -1,34 +1,75 @@
-const express = require('express')
-const app = express()
-const port = 3000
-var fs = require('fs'),
-    path = require('path'),    
-    filePath = path.join(__dirname, '/proc/meminfo');
+const express = require('express');
+const app = express();
+const port = 3000;
+const fs = require('fs');
+const path = require('path');
+const filePath = path.join(__dirname, '/proc/meminfo');
 
-app.set("view engine", "ejs")
+app.set("view engine", "ejs");
 app.use(express.static('static'));
 
 app.get('/', (req, res) => {
-  res.render("index")
-})
+  res.render("index");
+});
 
+//info page (will be removed, created for demonstration for frontend)
+app.get('/test', (req, res) => {
+  res.render("test");
+});
+
+// API to send memory info
 app.get('/api/meminfo', (req, res) => {
-    fs.readFile(filePath, {encoding: 'utf-8'}, function(err,data){
+    fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
         if (!err) {
             let memraw = data.split(/\r\n|\r|\n/); // get separated lines
-            let memTotal = data[0].replace(/[^0-9]/g, "");
-            let memFree = data[1].replace(/[^0-9]/g, "");
+            let memTotal = memraw[0].replace(/[^0-9]/g, ""); // get Total physical memory
+            let memFree = memraw[1].replace(/[^0-9]/g, ""); // get Free physical memory
             res.json({
                 "memTotal": memTotal,
                 "memFree": memFree,
-                "memUsed": memTotal-memFree
-            })
+                "memUsed": memTotal - memFree
+            });
         } else {
             console.log(err);
         }
     });
-  })
+});
+
+// SSE route to stream memory data
+app.get('/sse/meminfo', (req, res) => {
+    // Set the appropriate headers for SSE
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    
+    const sendMemInfo = () => {
+        fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
+            if (!err) {
+                let memraw = data.split(/\r\n|\r|\n/); // get separated lines
+                let memTotal = memraw[0].replace(/[^0-9]/g, ""); // get Total physical memory
+                let memFree = memraw[1].replace(/[^0-9]/g, ""); // get Free physical memory
+                const memInfo = {
+                    "memTotal": memTotal,
+                    "memFree": memFree,
+                    "memUsed": memTotal - memFree
+                };
+                // Send data to the client
+                res.write(`data: ${JSON.stringify(memInfo)}\n\n`);
+            } else {
+                console.log(err);
+            }
+        });
+    };
+
+    // Send memory info every 1 second
+    const interval = setInterval(sendMemInfo, 1000);
+
+    // Close the connection when the client disconnects
+    req.on('close', () => {
+        clearInterval(interval);
+    });
+});
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`)
-})
+  console.log(`Server is running on http://localhost:${port}`);
+});

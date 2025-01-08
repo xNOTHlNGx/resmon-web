@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Info</title>
+</head>
+<body>
+    <h1>Memory Info</h1>
+    <div id="mem-info">
+        Loading memory data...
+    </div>
+
+    <script>
+        // Create a new EventSource to listen for updates from the server
+        const eventSource = new EventSource('/sse/meminfo');
+
+        // Event listener for memory updates from the server
+        eventSource.onmessage = function(event) {
+            const memInfo = JSON.parse(event.data);
+            document.getElementById('mem-info').innerHTML = `
+                <strong>Total Memory:</strong> ${memInfo.memTotal} kB <br>
+                <strong>Free Memory:</strong> ${memInfo.memFree} kB <br>
+                <strong>Used Memory:</strong> ${memInfo.memUsed} kB
+            `;
+        };
+
+        // Handle any errors
+        eventSource.onerror = function(error) {
+            console.error('Error occurred while receiving SSE:', error);
+            eventSource.close();
+        };
+    </script>
+</body>
+</html>
