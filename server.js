@@ -38,25 +38,13 @@ app.get('/sse/meminfo', (req, res) => {
                 // Calculate used memory
                 let memUsedKb = memTotalKb - memAvailableKb;
 
-                // Helper function to convert KB to GB
-                const convertToGB = (kb) => {
-                    return (kb / 1024 / 1024).toFixed(2); // Convert KB to GB
-                };
-
-                // Convert all memory values to GB
-                const memTotal = convertToGB(memTotalKb);
-                const memFree = convertToGB(memFreeKb);
-                const memAvailable = convertToGB(memAvailableKb);
-                const memCached = convertToGB(cachedKb);
-                const memUsed = convertToGB(memUsedKb);
-
-                // Prepare memory info object
+                // Prepare memory info object with raw KB values
                 const memInfo = {
-                    memTotal: { value: memTotal, unit: 'GB' },
-                    memFree: { value: memFree, unit: 'GB' },
-                    memAvailable: { value: memAvailable, unit: 'GB' },
-                    memCached: { value: memCached, unit: 'GB' },
-                    memUsed: { value: memUsed, unit: 'GB' },
+                    memTotalKb: memTotalKb,
+                    memFreeKb: memFreeKb,
+                    memAvailableKb: memAvailableKb,
+                    memCachedKb: cachedKb,
+                    memUsedKb: memUsedKb,
                 };
 
                 // Send the data

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <title>Memory Info</title>
     <style>
         body {
@@ -26,85 +25,22 @@
 </head>
 <body>
     <h1>Memory Info</h1>
-    <canvas id="RAMchart" width="400" height="200"></canvas>
     <div class="mem-info">
-        <strong>Used Memory:</strong> <span id="used-memory">0 GB</span>
-        <strong>Available Memory:</strong> <span id="available-memory">0 GB</span>
+        <strong>Used Memory:</strong> <span id="used-memory">0 KB</span>
+        <strong>Available Memory:</strong> <span id="available-memory">0 KB</span>
+        <strong>Total Memory:</strong> <span id="total-memory">0 KB</span>
+        <strong>Free Memory:</strong> <span id="free-memory">0 KB</span>
+        <strong>Cached Memory:</strong> <span id="cached-memory">0 KB</span>
     </div>
 
     <script>
-        const ctx = document.getElementById('RAMchart').getContext('2d');
-        const usedMemorySpan = document.getElementById('used-memory');
-        const availableMemorySpan = document.getElementById('available-memory');
-
-        // Initialize the chart
-        const ramUsageChart = new Chart(ctx, {
-            type: 'line', // Line graph
-            data: {
-                labels: [], // Timestamps will go here
-                datasets: [
-                    {
-                        label: 'Used Memory (GB)',
-                        data: [], // Used memory data
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        tension: 0.1, // Smooth line
-                    },
-                    {
-                        label: 'Available Memory (GB)',
-                        data: [], // Available memory data
-                        borderColor: 'rgba(255, 159, 64, 1)',
-                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                        tension: 0.1, // Smooth line
-                    },
-                ],
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            unit: 'second',
-                        },
-                        title: {
-                            display: true,
-                            text: 'Time',
-                        },
-                    },
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Memory (GB)',
-                        },
-                    },
-                },
-            },
-        });
-
-        // Update chart with new data
-        const updateChart = (usedMemory, availableMemory) => {
-            const now = new Date();
-            const timestamp = now.toISOString();
-
-            // Add data points
-            ramUsageChart.data.labels.push(timestamp); // Add timestamp
-            ramUsageChart.data.datasets[0].data.push(usedMemory); // Add Used Memory
-            ramUsageChart.data.datasets[1].data.push(availableMemory); // Add Available Memory
-
-            // Remove old data if there are too many points (keep 30 points max)
-            if (ramUsageChart.data.labels.length > 30) {
-                ramUsageChart.data.labels.shift(); // Remove the first timestamp
-                ramUsageChart.data.datasets[0].data.shift(); // Remove old Used Memory
-                ramUsageChart.data.datasets[1].data.shift(); // Remove old Available Memory
+        // Function to convert KB to GB if KB > 1024
+        const convertToGB = (kb) => {
+            if (kb >= 1024) {
+                return (kb / 1024 / 1024).toFixed(2) + " GB"; // Convert KB to GB
+            } else {
+                return kb + " KB"; // If less than 1024 KB, just return KB
             }
-
-            ramUsageChart.update(); // Refresh the chart
-
-            // Update memory info
-            usedMemorySpan.textContent = `${usedMemory.toFixed(2)} GB`;
-            availableMemorySpan.textContent = `${availableMemory.toFixed(2)} GB`;
         };
 
         // Set up SSE connection
@@ -112,13 +48,15 @@
         eventSource.onmessage = function (event) {
             const memInfo = JSON.parse(event.data);
 
-            // Log incoming data to check
+            // Log incoming data for debugging
             console.log(memInfo);
 
-            const usedMemory = parseFloat(memInfo.memUsed.value); // In GB
-            const availableMemory = parseFloat(memInfo.memAvailable.value); // In GB
-
-            updateChart(usedMemory, availableMemory);
+            // Convert the memory values and display them
+            document.getElementById('used-memory').textContent = convertToGB(memInfo.memUsedKb);
+            document.getElementById('available-memory').textContent = convertToGB(memInfo.memAvailableKb);
+            document.getElementById('total-memory').textContent = convertToGB(memInfo.memTotalKb);
+            document.getElementById('free-memory').textContent = convertToGB(memInfo.memFreeKb);
+            document.getElementById('cached-memory').textContent = convertToGB(memInfo.memCachedKb);
         };
 
         eventSource.onerror = function (error) {
