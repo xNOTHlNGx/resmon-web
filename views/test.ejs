@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <title>Memory Info</title>
     <style>
         body {
@@ -111,8 +112,8 @@
         eventSource.onmessage = function (event) {
             const memInfo = JSON.parse(event.data);
 
-            const usedMemory = parseFloat(memInfo.memUsed.value) / (1024 * 1024 * 1024); // Convert to GB
-            const totalMemory = parseFloat(memInfo.memTotal.value) / (1024 * 1024 * 1024); // Convert to GB
+            const usedMemory = parseFloat(memInfo.memUsed.value); // In GB
+            const totalMemory = parseFloat(memInfo.memTotal.value); // In GB
 
             updateChart(usedMemory, totalMemory);
         };
@@ -122,6 +123,5 @@
             eventSource.close();
         };
     </script>
-
 </body>
 </html>
