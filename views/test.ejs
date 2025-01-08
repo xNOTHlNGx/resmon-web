@@ -29,13 +29,13 @@
     <canvas id="RAMchart" width="400" height="200"></canvas>
     <div class="mem-info">
         <strong>Used Memory:</strong> <span id="used-memory">0 GB</span>
-        <strong>Total Memory:</strong> <span id="total-memory">0 GB</span>
+        <strong>Available Memory:</strong> <span id="available-memory">0 GB</span>
     </div>
 
     <script>
         const ctx = document.getElementById('RAMchart').getContext('2d');
         const usedMemorySpan = document.getElementById('used-memory');
-        const totalMemorySpan = document.getElementById('total-memory');
+        const availableMemorySpan = document.getElementById('available-memory');
 
         // Initialize the chart
         const ramUsageChart = new Chart(ctx, {
@@ -51,11 +51,11 @@
                         tension: 0.1, // Smooth line
                     },
                     {
-                        label: 'Total Memory (GB)',
-                        data: [], // Total memory (static reference)
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderDash: [5, 5], // Dashed line for reference
-                        fill: false,
+                        label: 'Available Memory (GB)',
+                        data: [], // Available memory data
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        tension: 0.1, // Smooth line
                     },
                 ],
             },
@@ -84,27 +84,27 @@
         });
 
         // Update chart with new data
-        const updateChart = (usedMemory, totalMemory) => {
+        const updateChart = (usedMemory, availableMemory) => {
             const now = new Date();
             const timestamp = now.toISOString();
 
             // Add data points
             ramUsageChart.data.labels.push(timestamp); // Add timestamp
             ramUsageChart.data.datasets[0].data.push(usedMemory); // Add Used Memory
-            ramUsageChart.data.datasets[1].data.push(totalMemory); // Add Total Memory (optional)
+            ramUsageChart.data.datasets[1].data.push(availableMemory); // Add Available Memory
 
-            // Remove old data if there are too many points
-            if (ramUsageChart.data.labels.length > 50) {
+            // Remove old data if there are too many points (keep 30 points max)
+            if (ramUsageChart.data.labels.length > 30) {
                 ramUsageChart.data.labels.shift(); // Remove the first timestamp
                 ramUsageChart.data.datasets[0].data.shift(); // Remove old Used Memory
-                ramUsageChart.data.datasets[1].data.shift(); // Remove old Total Memory
+                ramUsageChart.data.datasets[1].data.shift(); // Remove old Available Memory
             }
 
             ramUsageChart.update(); // Refresh the chart
 
             // Update memory info
             usedMemorySpan.textContent = `${usedMemory.toFixed(2)} GB`;
-            totalMemorySpan.textContent = `${totalMemory.toFixed(2)} GB`;
+            availableMemorySpan.textContent = `${availableMemory.toFixed(2)} GB`;
         };
 
         // Set up SSE connection
@@ -112,10 +112,15 @@
         eventSource.onmessage = function (event) {
             const memInfo = JSON.parse(event.data);
 
-            const usedMemory = parseFloat(memInfo.memUsed.value); // In GB
-            const totalMemory = parseFloat(memInfo.memTotal.value); // In GB
+            // Convert memory values to GB
+            const totalMemoryKB = parseFloat(memInfo.memTotal.value); // In KB
+            const freeMemoryKB = parseFloat(memInfo.memFree.value); // In KB
+            const usedMemoryKB = totalMemoryKB - freeMemoryKB; // In KB
 
-            updateChart(usedMemory, totalMemory);
+            const usedMemoryGB = usedMemoryKB / (1024 * 1024); // Convert to GB
+            const availableMemoryGB = freeMemoryKB / (1024 * 1024); // Convert to GB
+
+            updateChart(usedMemoryGB, availableMemoryGB);
         };
 
         eventSource.onerror = function (error) {
