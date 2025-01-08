@@ -112,15 +112,13 @@
         eventSource.onmessage = function (event) {
             const memInfo = JSON.parse(event.data);
 
-            // Convert memory values to GB
-            const totalMemoryKB = parseFloat(memInfo.memTotal.value); // In KB
-            const freeMemoryKB = parseFloat(memInfo.memFree.value); // In KB
-            const usedMemoryKB = totalMemoryKB - freeMemoryKB; // In KB
+            // Log incoming data to check
+            console.log(memInfo);
 
-            const usedMemoryGB = usedMemoryKB / (1024 * 1024); // Convert to GB
-            const availableMemoryGB = freeMemoryKB / (1024 * 1024); // Convert to GB
+            const usedMemory = parseFloat(memInfo.memUsed.value); // In GB
+            const availableMemory = parseFloat(memInfo.memAvailable.value); // In GB
 
-            updateChart(usedMemoryGB, availableMemoryGB);
+            updateChart(usedMemory, availableMemory);
         };
 
         eventSource.onerror = function (error) {
@@ -128,5 +126,6 @@
             eventSource.close();
         };
     </script>
+
 </body>
 </html>

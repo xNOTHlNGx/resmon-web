@@ -38,29 +38,25 @@ app.get('/sse/meminfo', (req, res) => {
                 // Calculate used memory
                 let memUsedKb = memTotalKb - memAvailableKb;
 
-                // Helper function to format memory in MB or GB
-                const formatMemory = (kb) => {
-                    if (kb >= 1048576) {
-                        return { value: (kb / 1048576).toFixed(2), unit: 'GB' }; // Convert to GB
-                    } else {
-                        return { value: (kb / 1024).toFixed(2), unit: 'MB' }; // Convert to MB
-                    }
+                // Helper function to convert KB to GB
+                const convertToGB = (kb) => {
+                    return (kb / 1024 / 1024).toFixed(2); // Convert KB to GB
                 };
 
-                // Format memory data
-                const memTotal = formatMemory(memTotalKb);
-                const memFree = formatMemory(memFreeKb);
-                const memAvailable = formatMemory(memAvailableKb);
-                const memCached = formatMemory(cachedKb);
-                const memUsed = formatMemory(memUsedKb);
+                // Convert all memory values to GB
+                const memTotal = convertToGB(memTotalKb);
+                const memFree = convertToGB(memFreeKb);
+                const memAvailable = convertToGB(memAvailableKb);
+                const memCached = convertToGB(cachedKb);
+                const memUsed = convertToGB(memUsedKb);
 
                 // Prepare memory info object
                 const memInfo = {
-                    memTotal: memTotal,
-                    memFree: memFree,
-                    memAvailable: memAvailable,
-                    memCached: memCached,
-                    memUsed: memUsed,
+                    memTotal: { value: memTotal, unit: 'GB' },
+                    memFree: { value: memFree, unit: 'GB' },
+                    memAvailable: { value: memAvailable, unit: 'GB' },
+                    memCached: { value: memCached, unit: 'GB' },
+                    memUsed: { value: memUsed, unit: 'GB' },
                 };
 
                 // Send the data
