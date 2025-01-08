@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <title>Memory Info</title>
     <style>
         body {
@@ -24,39 +25,94 @@
 </head>
 <body>
     <h1>Memory Info</h1>
-    <div id="mem-info">
-        Loading memory data...
-    </div>
+    <canvas id="ram-usage-chart" width="400" height="200"></canvas>
+
 
     <script>
-        // Create a new EventSource to listen for updates from the server
+        const ctx = document.getElementById('ram-usage-chart').getContext('2d');
+    
+        // Initialize the chart
+        const ramUsageChart = new Chart(ctx, {
+            type: 'line', // Line graph
+            data: {
+                labels: [], // Timestamps will go here
+                datasets: [
+                    {
+                        label: 'Used Memory (GB)',
+                        data: [], // Used memory data
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1, // Smooth line
+                    },
+                    {
+                        label: 'Total Memory (GB)',
+                        data: [], // Total memory (static reference)
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderDash: [5, 5], // Dashed line for reference
+                        fill: false,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'second',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Time',
+                        },
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Memory (GB)',
+                        },
+                    },
+                },
+            },
+        });
+    
+        // Update chart with new data
+        const updateChart = (usedMemory, totalMemory) => {
+            const now = new Date();
+            const timestamp = now.toISOString();
+    
+            // Add data points
+            ramUsageChart.data.labels.push(timestamp); // Add timestamp
+            ramUsageChart.data.datasets[0].data.push(usedMemory); // Add Used Memory
+            ramUsageChart.data.datasets[1].data.push(totalMemory); // Add Total Memory (optional)
+    
+            // Remove old data if there are too many points
+            if (ramUsageChart.data.labels.length > 50) {
+                ramUsageChart.data.labels.shift(); // Remove the first timestamp
+                ramUsageChart.data.datasets[0].data.shift(); // Remove old Used Memory
+                ramUsageChart.data.datasets[1].data.shift(); // Remove old Total Memory
+            }
+    
+            ramUsageChart.update(); // Refresh the chart
+        };
+    
+        // Set up SSE connection
         const eventSource = new EventSource('/sse/meminfo');
-
-        // Function to update memory data on the page
-        const updateMemInfo = (data) => {
-            const { memTotal, memFree, memAvailable, memCached, memUsed } = data;
-
-            // Display memory data dynamically
-            document.getElementById('mem-info').innerHTML = `
-                <div class="mem-info"><strong>Total Memory:</strong> ${memTotal.value} ${memTotal.unit}</div>
-                <div class="mem-info"><strong>Free Memory:</strong> ${memFree.value} ${memFree.unit}</div>
-                <div class="mem-info"><strong>Available Memory:</strong> ${memAvailable.value} ${memAvailable.unit}</div>
-                <div class="mem-info"><strong>Cached Memory:</strong> ${memCached.value} ${memCached.unit}</div>
-                <div class="mem-info"><strong>Used Memory:</strong> ${memUsed.value} ${memUsed.unit}</div>
-            `;
-        };
-
-        // Event listener for memory updates from the server
-        eventSource.onmessage = function(event) {
+        eventSource.onmessage = function (event) {
             const memInfo = JSON.parse(event.data);
-            updateMemInfo(memInfo);
+    
+            const usedMemory = parseFloat(memInfo.memUsed.value); // Convert to GB
+            const totalMemory = parseFloat(memInfo.memTotal.value); // Convert to GB
+    
+            updateChart(usedMemory, totalMemory);
         };
-
-        // Handle any errors
-        eventSource.onerror = function(error) {
-            console.error('Error occurred while receiving SSE:', error);
+    
+        eventSource.onerror = function (error) {
+            console.error('SSE connection error:', error);
             eventSource.close();
         };
     </script>
+    
 </body>
 </html>
