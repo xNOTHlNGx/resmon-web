@@ -3,7 +3,7 @@ const app = express();
 const port = 3000;
 const fs = require('fs');
 const path = require('path');
-const filePath = path.join(__dirname, '/proc/meminfo');
+const filePath = path.join('/proc/meminfo');
 
 app.set("view engine", "ejs");
 app.use(express.static('static'));
@@ -22,8 +22,8 @@ app.get('/api/meminfo', (req, res) => {
     fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
         if (!err) {
             let memraw = data.split(/\r\n|\r|\n/); // get separated lines
-            let memTotal = memraw[0].replace(/[^0-9]/g, ""); // get Total physical memory
-            let memFree = memraw[1].replace(/[^0-9]/g, ""); // get Free physical memory
+            let memTotal = (parseInt(memraw[0].replace(/[^0-9]/g, ""))/1048576).toFixed(2); // get Total physical memory, divide by 1,048,576 (kb to gb), round to 2 symbols
+            let memFree = (parseInt(memraw[1].replace(/[^0-9]/g, ""))/1048576).toFixed(2); // get Free physical memory, divide by 1,048,576 (kb to gb), round to 2 symbols
             res.json({
                 "memTotal": memTotal,
                 "memFree": memFree,
@@ -71,5 +71,5 @@ app.get('/sse/meminfo', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on http://0.0.0.0:${port}`);
 });

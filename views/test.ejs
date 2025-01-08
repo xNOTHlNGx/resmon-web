@@ -19,9 +19,9 @@
         eventSource.onmessage = function(event) {
             const memInfo = JSON.parse(event.data);
             document.getElementById('mem-info').innerHTML = `
-                <strong>Total Memory:</strong> ${memInfo.memTotal} kB <br>
-                <strong>Free Memory:</strong> ${memInfo.memFree} kB <br>
-                <strong>Used Memory:</strong> ${memInfo.memUsed} kB
+                <strong>Total Memory:</strong> ${memInfo.memTotal} GB <br>
+                <strong>Free Memory:</strong> ${memInfo.memFree} GB <br>
+                <strong>Used Memory:</strong> ${memInfo.memUsed} GB
             `;
         };
 
