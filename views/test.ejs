@@ -25,12 +25,17 @@
 </head>
 <body>
     <h1>Memory Info</h1>
-    <canvas id="ram-usage-chart" width="400" height="200"></canvas>
-
+    <canvas id="RAMchart" width="400" height="200"></canvas>
+    <div class="mem-info">
+        <strong>Used Memory:</strong> <span id="used-memory">0 GB</span>
+        <strong>Total Memory:</strong> <span id="total-memory">0 GB</span>
+    </div>
 
     <script>
-        const ctx = document.getElementById('ram-usage-chart').getContext('2d');
-    
+        const ctx = document.getElementById('RAMchart').getContext('2d');
+        const usedMemorySpan = document.getElementById('used-memory');
+        const totalMemorySpan = document.getElementById('total-memory');
+
         // Initialize the chart
         const ramUsageChart = new Chart(ctx, {
             type: 'line', // Line graph
@@ -76,43 +81,47 @@
                 },
             },
         });
-    
+
         // Update chart with new data
         const updateChart = (usedMemory, totalMemory) => {
             const now = new Date();
             const timestamp = now.toISOString();
-    
+
             // Add data points
             ramUsageChart.data.labels.push(timestamp); // Add timestamp
             ramUsageChart.data.datasets[0].data.push(usedMemory); // Add Used Memory
             ramUsageChart.data.datasets[1].data.push(totalMemory); // Add Total Memory (optional)
-    
+
             // Remove old data if there are too many points
             if (ramUsageChart.data.labels.length > 50) {
                 ramUsageChart.data.labels.shift(); // Remove the first timestamp
                 ramUsageChart.data.datasets[0].data.shift(); // Remove old Used Memory
                 ramUsageChart.data.datasets[1].data.shift(); // Remove old Total Memory
             }
-    
+
             ramUsageChart.update(); // Refresh the chart
+
+            // Update memory info
+            usedMemorySpan.textContent = `${usedMemory.toFixed(2)} GB`;
+            totalMemorySpan.textContent = `${totalMemory.toFixed(2)} GB`;
         };
-    
+
         // Set up SSE connection
         const eventSource = new EventSource('/sse/meminfo');
         eventSource.onmessage = function (event) {
             const memInfo = JSON.parse(event.data);
-    
-            const usedMemory = parseFloat(memInfo.memUsed.value); // Convert to GB
-            const totalMemory = parseFloat(memInfo.memTotal.value); // Convert to GB
-    
+
+            const usedMemory = parseFloat(memInfo.memUsed.value) / (1024 * 1024 * 1024); // Convert to GB
+            const totalMemory = parseFloat(memInfo.memTotal.value) / (1024 * 1024 * 1024); // Convert to GB
+
             updateChart(usedMemory, totalMemory);
         };
-    
+
         eventSource.onerror = function (error) {
             console.error('SSE connection error:', error);
             eventSource.close();
         };
     </script>
-    
+
 </body>
 </html>
