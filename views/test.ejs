@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <title>Memory Info</title>
+    <title>System Info</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,10 +12,10 @@
         h1 {
             color: #333;
         }
-        .mem-info {
+        .info-section {
             margin: 10px 0;
         }
-        .mem-info strong {
+        .info-section strong {
             display: inline-block;
             width: 150px;
             color: #555;
@@ -24,34 +23,34 @@
     </style>
 </head>
 <body>
-    <h1>Memory Info</h1>
-    <div class="mem-info">
-        <strong>Used Memory:</strong> <span id="used-memory">0 KB</span>
-        <strong>Available Memory:</strong> <span id="available-memory">0 KB</span>
-        <strong>Total Memory:</strong> <span id="total-memory">0 KB</span>
-        <strong>Free Memory:</strong> <span id="free-memory">0 KB</span>
+    <h1>System Info</h1>
+    <div class="info-section">
+        <strong>Used Memory:</strong> <span id="used-memory">0 KB</span><br>
+        <strong>Available Memory:</strong> <span id="available-memory">0 KB</span><br>
+        <strong>Total Memory:</strong> <span id="total-memory">0 KB</span><br>
+        <strong>Free Memory:</strong> <span id="free-memory">0 KB</span><br>
         <strong>Cached Memory:</strong> <span id="cached-memory">0 KB</span>
+    </div>
+    <div class="info-section">
+        <strong>CPU Usage:</strong> <span id="cpu-usage">0%</span>
     </div>
 
     <script>
         // Function to convert KB to GB if KB > 1024
         const convertToGB = (kb) => {
-            if (kb >= 1024) {
+            if (kb >= 1024 * 1024) {
                 return (kb / 1024 / 1024).toFixed(2) + " GB"; // Convert KB to GB
             } else {
-                return kb + " KB"; // If less than 1024 KB, just return KB
+                return (kb / 1024).toFixed(2) + " MB"; // Convert KB to MB
             }
         };
 
-        // Set up SSE connection
-        const eventSource = new EventSource('/sse/meminfo');
-        eventSource.onmessage = function (event) {
+        // Memory Info SSE
+        const memInfoSource = new EventSource('/sse/meminfo');
+        memInfoSource.onmessage = function (event) {
             const memInfo = JSON.parse(event.data);
 
-            // Log incoming data for debugging
-            console.log(memInfo);
-
-            // Convert the memory values and display them
+            // Update memory information
             document.getElementById('used-memory').textContent = convertToGB(memInfo.memUsedKb);
             document.getElementById('available-memory').textContent = convertToGB(memInfo.memAvailableKb);
             document.getElementById('total-memory').textContent = convertToGB(memInfo.memTotalKb);
@@ -59,11 +58,24 @@
             document.getElementById('cached-memory').textContent = convertToGB(memInfo.memCachedKb);
         };
 
-        eventSource.onerror = function (error) {
-            console.error('SSE connection error:', error);
-            eventSource.close();
+        memInfoSource.onerror = function (error) {
+            console.error('Memory SSE connection error:', error);
+            memInfoSource.close();
+        };
+
+        // CPU Usage SSE
+        const cpuInfoSource = new EventSource('/sse/cpuinfo');
+        cpuInfoSource.onmessage = function (event) {
+            const cpuInfo = JSON.parse(event.data);
+
+            // Update CPU usage
+            document.getElementById('cpu-usage').textContent = cpuInfo.cpuUsage;
+        };
+
+        cpuInfoSource.onerror = function (error) {
+            console.error('CPU SSE connection error:', error);
+            cpuInfoSource.close();
         };
     </script>
-
 </body>
 </html>
