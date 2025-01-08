@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
 
 app.get('/test', (req, res) => {
     res.render("test");
-  });
+});
 
 // SSE route to stream memory data
 app.get('/sse/meminfo', (req, res) => {
@@ -26,10 +26,17 @@ app.get('/sse/meminfo', (req, res) => {
     const sendMemInfo = () => {
         fs.readFile(filePath, { encoding: 'utf-8' }, function (err, data) {
             if (!err) {
-                let memraw = data.split(/\r\n|\r|\n/); // get separated lines
-                let memTotalKb = parseInt(memraw[0].replace(/[^0-9]/g, ""), 10); // Total in KB
-                let memFreeKb = parseInt(memraw[1].replace(/[^0-9]/g, ""), 10); // Free in KB
-                let memUsedKb = memTotalKb - memFreeKb;
+                // get separated lines
+                let memraw = data.split(/\r\n|\r|\n/); 
+
+                // Parse memory values (in KB)
+                let memTotalKb = parseInt(memraw[0].replace(/[^0-9]/g, ""), 10); // MemTotal
+                let memFreeKb = parseInt(memraw[1].replace(/[^0-9]/g, ""), 10); // MemFree
+                let memAvailableKb = parseInt(memraw[2].replace(/[^0-9]/g, ""), 10); // MemAvailable
+                let cachedKb = parseInt(memraw[4].replace(/[^0-9]/g, ""), 10); // Cached
+
+                // Calculate used memory
+                let memUsedKb = memTotalKb - memAvailableKb;
 
                 // Helper function to format memory in MB or GB
                 const formatMemory = (kb) => {
@@ -40,16 +47,23 @@ app.get('/sse/meminfo', (req, res) => {
                     }
                 };
 
+                // Format memory data
                 const memTotal = formatMemory(memTotalKb);
                 const memFree = formatMemory(memFreeKb);
+                const memAvailable = formatMemory(memAvailableKb);
+                const memCached = formatMemory(cachedKb);
                 const memUsed = formatMemory(memUsedKb);
 
+                // Prepare memory info object
                 const memInfo = {
                     memTotal: memTotal,
                     memFree: memFree,
+                    memAvailable: memAvailable,
+                    memCached: memCached,
                     memUsed: memUsed,
                 };
 
+                // Send the data
                 res.write(`data: ${JSON.stringify(memInfo)}\n\n`);
             } else {
                 console.log(err);
