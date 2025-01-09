@@ -23,7 +23,7 @@ app.get('/sse/meminfo', (req, res) => {
     res.setHeader('Connection', 'keep-alive');
 
     const sendMemInfo = () => {
-        fs.readFile('/proc/stat', { encoding: 'utf-8' }, (err, data) => {
+        fs.readFile('/proc/meminfo', { encoding: 'utf-8' }, (err, data) => {
             if (!err) {
                 const memraw = data.split(/\r\n|\r|\n/);
                 const memTotalKb = parseInt(memraw[0].replace(/[^0-9]/g, ""), 10);
@@ -89,6 +89,57 @@ app.get('/sse/cpuinfo', (req, res) => {
     };
 
     const interval = setInterval(calculateCpuUsage, 1000);
+
+    req.on('close', () => {
+        clearInterval(interval);
+    });
+});
+
+// SSE route to stream bandwidth usage
+app.get('/sse/bandwidth', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    let prevReceived = 0, prevTransmitted = 0, totalReceived = 0, totalTransmitted = 0;
+
+    const calculateBandwidth = () => {
+        fs.readFile('/proc/net/dev', { encoding: 'utf-8' }, (err, data) => {
+            if (!err) {
+                const lines = data.split('\n').slice(2); // Skip the first two lines (headers)
+                let received = 0, transmitted = 0;
+
+                lines.forEach(line => {
+                    const fields = line.trim().split(/\s+/);
+                    if (fields.length > 9) {
+                        received += parseInt(fields[1], 10); // RX bytes
+                        transmitted += parseInt(fields[9], 10); // TX bytes
+                    }
+                });
+
+                if (prevReceived !== 0 && prevTransmitted !== 0) {
+                    const currentReceived = (received - prevReceived) / 1024; // KB/s
+                    const currentTransmitted = (transmitted - prevTransmitted) / 1024; // KB/s
+                    totalReceived += currentReceived;
+                    totalTransmitted += currentTransmitted;
+
+                    res.write(`data: ${JSON.stringify({
+                        currentReceivedKb: currentReceived.toFixed(2),
+                        currentTransmittedKb: currentTransmitted.toFixed(2),
+                        totalReceivedKb: totalReceived.toFixed(2),
+                        totalTransmittedKb: totalTransmitted.toFixed(2)
+                    })}\n\n`);
+                }
+
+                prevReceived = received;
+                prevTransmitted = transmitted;
+            } else {
+                console.log(err);
+            }
+        });
+    };
+
+    const interval = setInterval(calculateBandwidth, 1000);
 
     req.on('close', () => {
         clearInterval(interval);
