@@ -106,7 +106,7 @@ app.get('/sse/bandwidth', (req, res) => {
     const calculateBandwidth = () => {
         fs.readFile('/proc/net/dev', { encoding: 'utf-8' }, (err, data) => {
             if (!err) {
-                const lines = data.split('\n').slice(2); // Skip the first two lines (headers)
+                const lines = data.split('\n').slice(3); // Skip the first three lines (headers+lo)
                 let received = 0, transmitted = 0;
 
                 lines.forEach(line => {
