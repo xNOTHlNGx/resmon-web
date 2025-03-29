@@ -3,17 +3,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap');
 
 * {
+    height: fit-content;
+
     color: var(--bs-body-color);
     font-family: "Funnel Display";
 
     transition: all .35s ease;
 }
 
+.container-fluid {
+    @extend .d-flex;
+    @extend .flex-row;
+}
+
 .panel {
     @extend .d-flex;
     @extend .flex-column;
     @extend .w-25;
-    @extend .h-100;
+    @extend .min-vh-100;
     @extend .p-3;
     
     background-color: var(--bs-tertiary-bg);
@@ -23,7 +30,6 @@
     @extend .w-100;
     @extend .px-3;
     @extend .mb-2;
-    @extend .py-2;
     @extend .py-2;
     @extend .fs-4;
     @extend .fw-semibold;
@@ -46,4 +52,35 @@
 }
 .panel-button:is(.active), .panel-button:is(.active) .bi {
     color: white;
+}
+
+.page {
+    @extend .d-flex;
+    @extend .flex-row;
+    @extend .flex-wrap;
+    @extend .align-content-start;
+    @extend .w-75;
+    @extend .min-vh-100;
+    @extend .px-5;
+    @extend .py-3;
+}
+
+.page h1 {
+    @extend .w-100;
+    @extend .mb-4;
+}
+
+.info {
+    @extend .d-flex;
+    @extend .flex-column;
+    @extend .w-auto;
+    @extend .px-4;
+    @extend .py-3;
+    @extend .rounded-1;
+
+    background-color: var(--bs-light-bg-subtle);
+}
+
+.info-section {
+    @extend .my-2;
 }

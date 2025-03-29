@@ -14,8 +14,32 @@
             <div class="panel-button active"><i class="bi bi-house-fill"></i> Home</div>
             <div class="panel-button">Hello world</div>
         </div>
+
+        <div class="page">
+            <h1>System Info</h1>
+            
+            <div class="info">
+                <div class="info-section">
+                    <strong>Used Memory:</strong> <span id="used-memory">0 KB</span><br>
+                    <strong>Available Memory:</strong> <span id="available-memory">0 KB</span><br>
+                    <strong>Total Memory:</strong> <span id="total-memory">0 KB</span><br>
+                    <strong>Free Memory:</strong> <span id="free-memory">0 KB</span><br>
+                    <strong>Cached Memory:</strong> <span id="cached-memory">0 KB</span>
+                </div>
+                <div class="info-section">
+                    <strong>CPU Usage:</strong> <span id="cpu-usage">0%</span>
+                </div>
+                <div class="info-section">
+                    <strong>Current Received:</strong> <span id="current-received">0 KB</span><br>
+                    <strong>Current Transmitted:</strong> <span id="current-transmitted">0 KB</span><br>
+                    <strong>Total Received:</strong> <span id="total-received">0 KB</span><br>
+                    <strong>Total Transmitted:</strong> <span id="total-transmitted">0 KB</span>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <script src="/js/systemInfo.js"></script>
     <script src="/bs/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
