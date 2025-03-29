@@ -5,6 +5,8 @@
 * {
     color: var(--bs-body-color);
     font-family: "Funnel Display";
+
+    transition: all .35s ease;
 }
 
 .panel {
@@ -20,11 +22,28 @@
 .panel-button {
     @extend .w-100;
     @extend .px-3;
+    @extend .mb-2;
     @extend .py-2;
     @extend .py-2;
     @extend .fs-4;
     @extend .fw-semibold;
+    @extend .border;
+    @extend .border-1;
     @extend .rounded-1;
 
+    --bs-border-opacity: 0;
+    border-color: rgba(var(--bs-primary-border-subtle), var(--bs-border-opacity));
+
     background-color: var(--bs-secondary-bg);
+
+    cursor: pointer;
+}
+.panel-button:hover {
+    --bs-border-opacity: 1;
+}
+.panel-button:is(.active) {
+    background-color: var(--bs-primary);
+}
+.panel-button:is(.active), .panel-button:is(.active) .bi {
+    color: white;
 }
